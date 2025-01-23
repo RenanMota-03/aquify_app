@@ -1,5 +1,7 @@
 import 'package:aquify_app/common/constants/routes.dart';
 import 'package:aquify_app/features/home/homepage.dart';
+import 'package:aquify_app/features/sign_in/signinpage.dart';
+import 'package:aquify_app/features/sign_up/signuppage.dart';
 import 'package:flutter/material.dart';
 
 import 'features/onboarding/onboardingpage.dart';
@@ -15,8 +17,8 @@ class App extends StatelessWidget {
       routes: {
         NamedRoute.initial: (context) => OnboardingPage(),
         NamedRoute.splash: (context) => SplashPage(),
-        NamedRoute.signIn: (context) => SplashPage(),
-        NamedRoute.signUp: (context) => SplashPage(),
+        NamedRoute.signIn: (context) => SignInPage(),
+        NamedRoute.signUp: (context) => SignUpPage(),
         NamedRoute.home: (context) => HomePage(),
       },
     );
