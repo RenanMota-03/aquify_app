@@ -5,11 +5,15 @@ class AppColors {
   static const Color blueOne = Color(0xFF03A9F4);
   static const Color blueTwo = Color(0xFF81D4FA);
   static const List<Color> blueGradient = [
-    Color(0xFFE0F7FA),
     Color(0xFFB3E5FC),
     Color(0xFF81D4FA),
+    Color(0xFFE0F7FA),
   ];
   static const List<Color> blue2Gradient = [
+    Color(0xFF03A9F4),
+    Color(0xFF81D4FA),
+  ];
+  static const List<Color> blue3Gradient = [
     Color(0xFF03A9F4),
     Color(0xFF81D4FA),
   ];
