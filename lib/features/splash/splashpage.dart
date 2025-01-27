@@ -1,11 +1,14 @@
-import 'dart:async';
+import 'dart:developer';
 
 import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:aquify_app/common/widgets/custom_circular_progress_indicator.dart';
+import 'package:aquify_app/features/splash/splash_controller.dart';
+import 'package:aquify_app/locator.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/constants/routes.dart';
+import 'splash_state.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,18 +18,27 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  final _splashController = locator.get<SplashController>();
+
   @override
   void initState() {
     super.initState();
-    init();
+    _splashController.isUserLogged();
+    _splashController.addListener(() {
+      if (_splashController.state is SplashStateSuccess) {
+        Navigator.pushReplacementNamed(context, NamedRoute.home);
+        log('navegar para home');
+      } else {
+        Navigator.pushReplacementNamed(context, NamedRoute.initial);
+        log('navegar para onboarding');
+      }
+    });
   }
 
-  Timer init() {
-    return Timer(Duration(seconds: 3), navigateToHome);
-  }
-
-  void navigateToHome() {
-    Navigator.pushReplacementNamed(context, NamedRoute.initial);
+  @override
+  void dispose() {
+    _splashController.dispose();
+    super.dispose();
   }
 
   @override

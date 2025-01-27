@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "396479662232",
+    "project_id": "aquify-app",
+    "storage_bucket": "aquify-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396479662232:android:228dc3c57aebd96729e8ed",
+        "android_client_info": {
+          "package_name": "com.aqui.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhFPaJg4ezbpy1cAxD0ey2KSRt6tKtQrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396479662232:android:726959c27765e78529e8ed",
+        "android_client_info": {
+          "package_name": "com.aquify.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhFPaJg4ezbpy1cAxD0ey2KSRt6tKtQrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396479662232:android:c8c2bca246806ea029e8ed",
+        "android_client_info": {
+          "package_name": "com.example.aquify_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhFPaJg4ezbpy1cAxD0ey2KSRt6tKtQrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
