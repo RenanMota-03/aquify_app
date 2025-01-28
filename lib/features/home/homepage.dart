@@ -1,8 +1,8 @@
 import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
+import 'package:aquify_app/features/goals/goalspage.dart';
+import 'package:aquify_app/features/goals/newgoals/newgoalspage.dart';
 import 'package:flutter/material.dart';
-
-import '../../common/widgets/grafic_circular.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,9 +12,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int touchedIndex = -1;
-  double graficoValor = 0;
-  String graficoLabel = 'Meta';
+  int pageAtual = 0;
+  late PageController pageController;
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController(initialPage: pageAtual);
+  }
+
+  setPageAtual(page) {
+    setState(() {
+      pageAtual = page;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,49 +46,42 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Align(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: AppColors.blueGradient,
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+
+      body: PageView(
+        controller: pageController,
+        onPageChanged: setPageAtual,
+        children: [GoalsPage(), NewGoalsPage()],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: pageAtual,
+        backgroundColor: AppColors.blueOne,
+        selectedLabelStyle: AppTextStyles.smallText,
+        unselectedLabelStyle: AppTextStyles.smallText,
+        selectedItemColor: AppColors.iceWhite,
+        unselectedItemColor: AppColors.grey,
+        selectedIconTheme: IconThemeData(color: AppColors.iceWhite),
+        unselectedIconTheme: IconThemeData(color: AppColors.grey),
+
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.water_damage),
+            label: "Inicio",
+            tooltip: "Inicio",
           ),
-          child: Column(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: GraficCircularWidget(onSectionTouched: setGraficoDados),
-              ),
-              Column(
-                children: [
-                  Text(
-                    graficoLabel,
-                    style: TextStyle(fontSize: 20, color: Colors.teal),
-                  ),
-                  Text("$graficoValor", style: TextStyle(fontSize: 28)),
-                ],
-              ),
-            ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: "Nova Meta",
+            tooltip: "Nova Meta",
           ),
-        ),
+        ],
+        onTap: (page) {
+          pageController.animateToPage(
+            page,
+            duration: Duration(milliseconds: 400),
+            curve: Curves.ease,
+          );
+        },
       ),
     );
-  }
-
-  setGraficoDados(index) {
-    if (index < 0) {
-      graficoLabel = 'Meta';
-      graficoValor = 0;
-    } else if (index == 1) {
-      graficoLabel = 'Saldo';
-      graficoValor = 123;
-    } else {
-      graficoLabel = "Teste";
-      graficoValor = 12;
-    }
   }
 }

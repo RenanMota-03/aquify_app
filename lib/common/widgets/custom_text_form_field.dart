@@ -17,9 +17,15 @@ class CustomTextFormField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final FormFieldValidator<String>? validator;
   final String? helperText;
+  final Color? colorInput;
+  final Color? colorBorderSide;
+  final Color? colorHintText;
+  final bool? readOnly;
+  final VoidCallback? onTap;
   const CustomTextFormField({
     super.key,
     this.padding,
+    this.colorInput,
     this.hintText,
     this.labelText,
     this.textCapitalization,
@@ -32,6 +38,10 @@ class CustomTextFormField extends StatefulWidget {
     this.inputFormatters,
     this.validator,
     this.helperText,
+    this.colorBorderSide,
+    this.colorHintText,
+    this.readOnly,
+    this.onTap,
   });
 
   @override
@@ -39,9 +49,6 @@ class CustomTextFormField extends StatefulWidget {
 }
 
 class _CustomTextFormFieldState extends State<CustomTextFormField> {
-  final defaultBorder = const OutlineInputBorder(
-    borderSide: BorderSide(color: AppColors.blueTwo),
-  );
   String? _helperText;
   @override
   void initState() {
@@ -51,11 +58,18 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final defaultBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: widget.colorBorderSide ?? AppColors.blueTwo,
+      ),
+    );
     return Padding(
       padding:
           widget.padding ??
           const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       child: TextFormField(
+        onTap: widget.onTap,
+        readOnly: widget.readOnly ?? false,
         onChanged: (value) {
           if (value.length == 1) {
             setState(() {
@@ -68,7 +82,9 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           }
         },
         validator: widget.validator,
-        style: AppTextStyles.inputText.copyWith(color: AppColors.blueOne),
+        style: AppTextStyles.inputText.copyWith(
+          color: widget.colorInput ?? AppColors.blueOne,
+        ),
         inputFormatters: widget.inputFormatters,
         obscureText: widget.obscureText ?? false,
         textInputAction: widget.textInputAction,
@@ -83,7 +99,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           suffixIcon: widget.suffixIcon,
           hintText: widget.hintText,
           hintStyle: AppTextStyles.inputHintText.copyWith(
-            color: AppColors.blueTwo,
+            color: widget.colorHintText ?? AppColors.blueTwo,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           labelText: widget.labelText?.toUpperCase(),

@@ -14,6 +14,7 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      borderRadius: _borderRadius,
       child: Ink(
         height: 48.0,
         decoration: BoxDecoration(

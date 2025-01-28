@@ -48,7 +48,11 @@ class _SignInPageState extends State<SignInPage> {
       }
       if (_controller.state is SignInStateSuccess) {
         Navigator.pop(context);
-        Navigator.pushNamed(context, NamedRoute.home);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          NamedRoute.home,
+          (Route<dynamic> route) => false,
+        );
       }
       if (_controller.state is SignInStateError) {
         final error = _controller.state as SignInStateError;

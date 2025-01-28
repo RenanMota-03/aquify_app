@@ -1,12 +1,11 @@
 import 'dart:developer';
+import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart'; // Ajuste o caminho para o seu projeto
 
 class GraficCircularWidget extends StatefulWidget {
-  final ValueChanged<int> onSectionTouched;
-
-  const GraficCircularWidget({super.key, required this.onSectionTouched});
+  const GraficCircularWidget({super.key});
 
   @override
   State<GraficCircularWidget> createState() => _GraficCircularWidgetState();
@@ -14,34 +13,51 @@ class GraficCircularWidget extends StatefulWidget {
 
 class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   int touchedIndex = -1;
-
+  double graficoValor = 100;
+  String graficoLabel = 'Meta';
   @override
   Widget build(BuildContext context) {
-    return PieChart(
-      PieChartData(
-        centerSpaceColor: AppColors.blueTwo,
-        sectionsSpace: 0,
-        centerSpaceRadius: 110,
-        sections: showingSections(),
-        pieTouchData: PieTouchData(
-          touchCallback: (FlTouchEvent event, pieTouchResponse) {
-            setState(() {
-              if (event is FlTapUpEvent ||
-                  !event.isInterestedForInteractions ||
-                  pieTouchResponse == null ||
-                  pieTouchResponse.touchedSection == null) {
-                // Reset when the user releases or taps outside a section
-                touchedIndex = -1;
-                widget.onSectionTouched(touchedIndex); // Notify parent
-                return;
-              }
-              touchedIndex =
-                  pieTouchResponse.touchedSection!.touchedSectionIndex;
-              widget.onSectionTouched(touchedIndex); // Notify parent
-            });
-          },
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        PieChart(
+          PieChartData(
+            sectionsSpace: 0,
+            centerSpaceRadius: 110,
+            sections: showingSections(),
+            pieTouchData: PieTouchData(
+              touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                setState(() {
+                  if (event is FlTapUpEvent ||
+                      !event.isInterestedForInteractions ||
+                      pieTouchResponse == null ||
+                      pieTouchResponse.touchedSection == null) {
+                    // Reset when the user releases or taps outside a section
+                    touchedIndex = -1;
+                    setGraficoDados(touchedIndex); // Notify parent
+                    return;
+                  }
+                  touchedIndex =
+                      pieTouchResponse.touchedSection!.touchedSectionIndex;
+                  setGraficoDados(touchedIndex); // Notify parent
+                });
+              },
+            ),
+          ),
         ),
-      ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              graficoLabel,
+              style: AppTextStyles.mediumText30.copyWith(
+                color: AppColors.darkGrey,
+              ),
+            ),
+            Text("${graficoValor}L", style: TextStyle(fontSize: 28)),
+          ],
+        ),
+      ],
     );
   }
 
@@ -55,8 +71,8 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         case 0:
           return PieChartSectionData(
             color: AppColors.blueOne,
-            value: 40,
-            title: '40%',
+            value: 70,
+            title: '70%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -83,5 +99,18 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
           throw Error();
       }
     });
+  }
+
+  setGraficoDados(index) {
+    if (index < 0) {
+      graficoLabel = 'Meta';
+      graficoValor = 100;
+    } else if (index == 1) {
+      graficoLabel = 'Restante';
+      graficoValor = 30;
+    } else {
+      graficoLabel = "Bebido";
+      graficoValor = 70;
+    }
   }
 }

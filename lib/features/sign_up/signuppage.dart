@@ -51,7 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
       if (_controller.state is SignUpStateSuccess) {
         Navigator.pop(context);
-        Navigator.pushNamed(context, NamedRoute.home);
+        Navigator.pushReplacementNamed(context, NamedRoute.home);
       }
       if (_controller.state is SignUpStateError) {
         final error = _controller.state as SignUpStateError;

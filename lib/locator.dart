@@ -11,7 +11,7 @@ final locator = GetIt.instance;
 void setupDependencies() {
   locator.registerLazySingleton<AuthService>(() => FirebaseAuthService());
   locator.registerFactory<SignInController>(
-    () => SignInController(locator.get<AuthService>()),
+    () => SignInController(locator.get<AuthService>(), SecureStorage()),
   );
   locator.registerFactory<SignUpController>(
     () => SignUpController(locator.get<AuthService>()),
