@@ -46,29 +46,4 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCRIqK95sTqY7ToL21blNOg6e6WrHy-ClY',
-    appId: '1:396479662232:web:6a430837e0f0b44f29e8ed',
-    messagingSenderId: '396479662232',
-    projectId: 'aquify-app',
-    authDomain: 'aquify-app.firebaseapp.com',
-    storageBucket: 'aquify-app.firebasestorage.app',
-  );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDhFPaJg4ezbpy1cAxD0ey2KSRt6tKtQrc',
-    appId: '1:396479662232:android:c8c2bca246806ea029e8ed',
-    messagingSenderId: '396479662232',
-    projectId: 'aquify-app',
-    storageBucket: 'aquify-app.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB7KJeUXnyyctLZfB6dqTedEJJ6d0cUDFU',
-    appId: '1:396479662232:ios:e33552c7963ab76b29e8ed',
-    messagingSenderId: '396479662232',
-    projectId: 'aquify-app',
-    storageBucket: 'aquify-app.firebasestorage.app',
-    iosBundleId: 'com.example.aquifyApp',
-  );
-}
