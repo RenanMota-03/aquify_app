@@ -22,7 +22,9 @@ class _GoalspageState extends State<GoalsPage> {
 
               Padding(
                 padding: const EdgeInsets.only(left: 40, right: 40),
-                child: PrimaryButton(text: "Beber", onPressed: () {}),
+                child: Column(
+                  children: [PrimaryButton(text: "Beber", onPressed: () {})],
+                ),
               ),
             ],
           ),

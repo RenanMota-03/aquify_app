@@ -1,6 +1,13 @@
 class Validator {
   Validator._();
 
+  static String? validateIsEmpty(String? value) {
+    if (value != null && value.isEmpty) {
+      return "Esse campo não pode ser vazio.";
+    }
+    return null;
+  }
+
   static String? validateName(String? value) {
     final condition = RegExp(r"((\ *)[\wáéíóúñ]+(\ *)+)+");
     if (value != null && value.isEmpty) {

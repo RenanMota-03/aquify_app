@@ -1,23 +1,30 @@
 import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
-import 'package:aquify_app/features/goals/goalspage.dart';
-import 'package:aquify_app/features/goals/newgoals/newgoalspage.dart';
+import 'package:aquify_app/features/goals/goalpage.dart';
+import 'package:aquify_app/features/newgoals/newgoals_state.dart';
+import 'package:aquify_app/features/newgoals/newgoalspage.dart';
 import 'package:flutter/material.dart';
+
+import '../../locator.dart';
+import '../newgoals/newgoals_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   int pageAtual = 0;
+  final _controllerNewGoal = locator.get<NewGoalsController>();
   late PageController pageController;
   @override
   void initState() {
     super.initState();
     pageController = PageController(initialPage: pageAtual);
+    if (_controllerNewGoal is NewGoalsStateSuccess) {
+      setPageAtual(pageAtual - 1);
+    }
   }
 
   setPageAtual(page) {

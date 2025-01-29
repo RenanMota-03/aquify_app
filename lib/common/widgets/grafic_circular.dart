@@ -2,7 +2,11 @@ import 'dart:developer';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart'; // Ajuste o caminho para o seu projeto
+import '../../features/goals/goal_controller.dart';
+import '../../locator.dart';
+import '../constants/app_colors.dart';
+import '../models/goals_model.dart';
+import 'package:intl/intl.dart';
 
 class GraficCircularWidget extends StatefulWidget {
   const GraficCircularWidget({super.key});
@@ -12,9 +16,74 @@ class GraficCircularWidget extends StatefulWidget {
 }
 
 class _GraficCircularWidgetState extends State<GraficCircularWidget> {
+  final _goalController = locator.get<GoalController>();
+  GoalsModel? _goal;
   int touchedIndex = -1;
-  double graficoValor = 100;
+  double graficoValor = 0.0;
+  double progressgoal = 0.0;
+  double restantgoal = 0.0;
   String graficoLabel = 'Meta';
+  double intervalos = 0;
+  List<String> horario = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGoalData();
+  }
+
+  void _loadGoalData() async {
+    GoalsModel? goal = await _goalController.getGoal();
+    setState(() {
+      _goal = goal;
+      graficoValor = _parseDouble(goal?.metaL);
+    });
+  }
+
+  double _parseDouble(String? value) {
+    if (value == null || value.isEmpty) return 0.0;
+    return double.tryParse(value) ?? 0.0;
+  }
+
+  void _loadHours() {
+    String? horaInicio = _goal!.dateBegin;
+    String? horaFim = _goal!.dateEnd;
+    double intervaloMinutos = 0; // Defina o tamanho do intervalo
+    double quantidadeMl = _parseDouble(_goal!.quantidadeMl!);
+    quantidadeMl = quantidadeMl / 1000;
+    double meta = _parseDouble(_goal?.metaL);
+
+    DateFormat format = DateFormat("HH:mm");
+
+    DateTime inicio = format.parse(horaInicio!);
+    DateTime fim = format.parse(horaFim!);
+
+    // Calculando a diferença total
+    Duration diferenca = fim.difference(inicio);
+    int totalMinutos = diferenca.inMinutes;
+    double numIntervalos = meta / quantidadeMl;
+    intervaloMinutos = totalMinutos / numIntervalos;
+
+    List<String> horarios = [];
+    for (int i = 0; i <= numIntervalos; i++) {
+      DateTime horarioAtual = inicio.add(
+        Duration(minutes: i * intervaloMinutos.toInt()),
+      );
+      horarios.add(format.format(horarioAtual));
+    }
+
+    intervalos = numIntervalos;
+    horario = horarios;
+    log("Total de intervalos: $numIntervalos");
+    log("Horários dos intervalos: $horarios");
+  }
+
+  @override
+  void dispose() {
+    _goalController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -32,14 +101,13 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
                       !event.isInterestedForInteractions ||
                       pieTouchResponse == null ||
                       pieTouchResponse.touchedSection == null) {
-                    // Reset when the user releases or taps outside a section
                     touchedIndex = -1;
-                    setGraficoDados(touchedIndex); // Notify parent
+                    setGraficoDados(touchedIndex);
                     return;
                   }
                   touchedIndex =
                       pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  setGraficoDados(touchedIndex); // Notify parent
+                  setGraficoDados(touchedIndex);
                 });
               },
             ),
@@ -102,9 +170,14 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   }
 
   setGraficoDados(index) {
+    if (_goal != null) {
+      _loadHours();
+      log("$horario");
+      log("$intervalos");
+    }
     if (index < 0) {
       graficoLabel = 'Meta';
-      graficoValor = 100;
+      graficoValor = _parseDouble(_goal?.metaL);
     } else if (index == 1) {
       graficoLabel = 'Restante';
       graficoValor = 30;
