@@ -6,6 +6,7 @@ import 'package:aquify_app/services/goals_service.dart';
 import 'package:aquify_app/services/secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
+import 'common/widgets/grafic_circular/grafic_circular_controller.dart';
 import 'features/sign_in/sign_in_controller.dart';
 import 'features/sign_up/sign_up_controller.dart';
 import 'services/auth_service.dart';
@@ -29,5 +30,8 @@ void setupDependencies() {
   );
   locator.registerFactory<NewGoalsController>(
     () => NewGoalsController(locator.get<GoalsService>()),
+  );
+  locator.registerFactory<GraficCircularController>(
+    () => GraficCircularController(),
   );
 }

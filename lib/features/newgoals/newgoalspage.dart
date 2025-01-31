@@ -5,7 +5,6 @@ import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:aquify_app/common/utils/validator.dart';
 import 'package:aquify_app/common/widgets/custom_background_container.dart';
 import 'package:aquify_app/common/widgets/custom_datetime_form_field.dart';
-import 'package:aquify_app/common/widgets/custom_text_form_field.dart';
 import 'package:aquify_app/common/widgets/primary_button.dart';
 import 'package:aquify_app/features/newgoals/newgoals_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +12,13 @@ import 'package:flutter/material.dart';
 import '../../common/constants/routes.dart';
 import '../../common/widgets/custom_bottom_sheet.dart';
 import '../../common/widgets/custom_circular_progress_indicator.dart';
+import '../../common/widgets/dropdown_widget.dart';
 import '../../locator.dart';
 import 'newgoals_state.dart';
 
 class NewGoalsPage extends StatefulWidget {
-  const NewGoalsPage({super.key});
+  final List<String> listQuantidade;
+  const NewGoalsPage({super.key, required this.listQuantidade});
 
   @override
   State<NewGoalsPage> createState() => _NewGoalsPageState();
@@ -30,14 +31,13 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
   final TextEditingController _dateEndController = TextEditingController();
   final TextEditingController _quantidadeMlController = TextEditingController();
   final _controller = locator.get<NewGoalsController>();
+  List<String> listMeta = ["1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
   @override
   void dispose() {
     super.dispose();
     _controller.dispose();
-    _metaLController.dispose();
     _dateBeginController.dispose();
     _dateEndController.dispose();
-    _quantidadeMlController.dispose();
   }
 
   @override
@@ -91,15 +91,10 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    CustomTextFormField(
-                      keyboardType: TextInputType.number,
-                      hintText: "Quantidade de Litros p/dia(em numeros)",
-                      labelText: "Meta Diaria",
-                      colorInput: AppColors.iceWhite,
-                      colorBorderSide: AppColors.grey,
-                      colorHintText: AppColors.grey,
-                      validator: Validator.validateIsEmpty,
+                    DropdownMenuWidget(
                       controller: _metaLController,
+                      list: listMeta,
+                      hintText: "Selecione a sua Meta",
                     ),
                     CustomDatetimeFormField(
                       labelText: "Horario de Inicio",
@@ -113,15 +108,10 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                       validator: Validator.validateIsEmpty,
                       controller: _dateEndController,
                     ),
-                    CustomTextFormField(
-                      keyboardType: TextInputType.number,
-                      labelText: "Quantidade de Agua por Intervalo",
-                      hintText: "Quanto de Agua a cada intervalo, em ml",
-                      colorInput: AppColors.iceWhite,
-                      colorBorderSide: AppColors.grey,
-                      colorHintText: AppColors.grey,
-                      validator: Validator.validateIsEmpty,
+                    DropdownMenuWidget(
                       controller: _quantidadeMlController,
+                      list: widget.listQuantidade,
+                      hintText: "Selecione o tamanho do seu Copo",
                     ),
                     Padding(
                       padding: const EdgeInsets.all(32.0),
@@ -139,6 +129,8 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                               dateBegin: _dateBeginController.text,
                               dateEnd: _dateEndController.text,
                             );
+                            log(_dateBeginController.text);
+                            log(_dateEndController.text);
                           } else {
                             log("erro de login");
                           }

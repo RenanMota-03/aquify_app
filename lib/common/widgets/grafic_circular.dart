@@ -9,7 +9,8 @@ import '../models/goals_model.dart';
 import 'package:intl/intl.dart';
 
 class GraficCircularWidget extends StatefulWidget {
-  const GraficCircularWidget({super.key});
+  final double progress;
+  const GraficCircularWidget({super.key, required this.progress});
 
   @override
   State<GraficCircularWidget> createState() => _GraficCircularWidgetState();
@@ -23,13 +24,19 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   double progressgoal = 0.0;
   double restantgoal = 0.0;
   String graficoLabel = 'Meta';
-  double intervalos = 0;
-  List<String> horario = [];
+  int intervalos = 0;
+  List<DateTime> horario = [];
+  List<DateTime> horarios = [];
+  DateTime now = DateTime.now();
+  DateTime? nextHour;
+  DateFormat format = DateFormat("HH:mm");
 
   @override
   void initState() {
     super.initState();
     _loadGoalData();
+    _loadHours();
+    _viewNextHour();
   }
 
   void _loadGoalData() async {
@@ -46,36 +53,92 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   }
 
   void _loadHours() {
+    if (_goal == null) return;
+
     String? horaInicio = _goal!.dateBegin;
     String? horaFim = _goal!.dateEnd;
-    double intervaloMinutos = 0; // Defina o tamanho do intervalo
-    double quantidadeMl = _parseDouble(_goal!.quantidadeMl!);
-    quantidadeMl = quantidadeMl / 1000;
-    double meta = _parseDouble(_goal?.metaL);
+    if (horaInicio == null || horaFim == null) return;
 
-    DateFormat format = DateFormat("HH:mm");
+    double quantidadeMl = _parseDouble(_goal!.quantidadeMl!) / 1000;
+    double meta = _parseDouble(_goal!.metaL);
 
-    DateTime inicio = format.parse(horaInicio!);
-    DateTime fim = format.parse(horaFim!);
+    DateTime now = DateTime.now();
+    DateTime inicio = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(horaInicio.split(":")[0]),
+      int.parse(horaInicio.split(":")[1]),
+    );
 
-    // Calculando a diferença total
-    Duration diferenca = fim.difference(inicio);
-    int totalMinutos = diferenca.inMinutes;
-    double numIntervalos = meta / quantidadeMl;
-    intervaloMinutos = totalMinutos / numIntervalos;
+    DateTime fim = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(horaFim.split(":")[0]),
+      int.parse(horaFim.split(":")[1]),
+    );
 
-    List<String> horarios = [];
-    for (int i = 0; i <= numIntervalos; i++) {
-      DateTime horarioAtual = inicio.add(
-        Duration(minutes: i * intervaloMinutos.toInt()),
-      );
-      horarios.add(format.format(horarioAtual));
+    if (fim.isBefore(inicio)) {
+      fim = fim.add(const Duration(days: 1));
     }
 
-    intervalos = numIntervalos;
+    Duration diferenca = fim.difference(inicio);
+    int totalMinutos = diferenca.inMinutes;
+    int numIntervalos = (meta / quantidadeMl).floor();
+    int intervaloMinutos = totalMinutos ~/ numIntervalos;
+
+    horarios.clear();
+    for (int i = 0; i <= numIntervalos; i++) {
+      DateTime horarioAtual = inicio.add(
+        Duration(minutes: i * intervaloMinutos),
+      );
+      horarios.add(horarioAtual);
+    }
     horario = horarios;
-    log("Total de intervalos: $numIntervalos");
-    log("Horários dos intervalos: $horarios");
+    intervalos = numIntervalos;
+    _updateNextHour();
+  }
+
+  void _updateNextHour() {
+    now = DateTime.now();
+    nextHour = null;
+
+    for (DateTime horario in horarios) {
+      if (horario.isAfter(now)) {
+        nextHour = _roundToNextTenMinutes(horario);
+        break;
+      }
+    }
+
+    log(
+      nextHour != null
+          ? "Próximo horário arredondado: ${format.format(nextHour!)}"
+          : "Todos os intervalos já passaram.",
+    );
+  }
+
+  DateTime _roundToNextTenMinutes(DateTime dateTime) {
+    int minute = dateTime.minute;
+    int roundedMinute = ((minute ~/ 10) + 1) * 10;
+
+    if (roundedMinute == 60) {
+      return DateTime(
+        dateTime.year,
+        dateTime.month,
+        dateTime.day,
+        dateTime.hour + 1,
+        0,
+      );
+    }
+
+    return DateTime(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      dateTime.hour,
+      roundedMinute,
+    );
   }
 
   @override
@@ -92,7 +155,7 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         PieChart(
           PieChartData(
             sectionsSpace: 0,
-            centerSpaceRadius: 110,
+            centerSpaceRadius: 120,
             sections: showingSections(),
             pieTouchData: PieTouchData(
               touchCallback: (FlTouchEvent event, pieTouchResponse) {
@@ -123,6 +186,7 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
               ),
             ),
             Text("${graficoValor}L", style: TextStyle(fontSize: 28)),
+            _viewNextHour(),
           ],
         ),
       ],
@@ -130,6 +194,15 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   }
 
   List<PieChartSectionData> showingSections() {
+    double metaDouble = _parseDouble(_goal?.metaL);
+    if (widget.progress != 0) {
+      progressgoal = widget.progress;
+    }
+    if (progressgoal == 0.0) {
+      restantgoal = metaDouble;
+    } else {
+      restantgoal = metaDouble - progressgoal;
+    }
     return List.generate(2, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
@@ -139,8 +212,9 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         case 0:
           return PieChartSectionData(
             color: AppColors.blueOne,
-            value: 70,
-            title: '70%',
+            value: progressgoal >= metaDouble ? metaDouble : progressgoal,
+            title:
+                '${progressgoal >= metaDouble ? 100 : ((progressgoal * 100) / metaDouble).toStringAsFixed(1)}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -152,8 +226,9 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         case 1:
           return PieChartSectionData(
             color: AppColors.darkGrey,
-            value: 30,
-            title: '30%',
+            value: progressgoal >= metaDouble ? 0.0 : restantgoal,
+            title:
+                '${progressgoal >= metaDouble ? 0 : ((restantgoal * 100) / metaDouble).toStringAsFixed(1)}%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,
@@ -170,20 +245,43 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   }
 
   setGraficoDados(index) {
+    double metaDouble = _parseDouble(_goal?.metaL);
     if (_goal != null) {
       _loadHours();
-      log("$horario");
-      log("$intervalos");
+    }
+    if (widget.progress != 0) {
+      progressgoal = widget.progress;
+    }
+    if (progressgoal == 0) {
+      restantgoal = metaDouble;
+    } else {
+      restantgoal = metaDouble - progressgoal;
     }
     if (index < 0) {
       graficoLabel = 'Meta';
-      graficoValor = _parseDouble(_goal?.metaL);
+      graficoValor = metaDouble;
     } else if (index == 1) {
       graficoLabel = 'Restante';
-      graficoValor = 30;
+      graficoValor = double.parse(restantgoal.toStringAsFixed(1));
     } else {
       graficoLabel = "Bebido";
-      graficoValor = 70;
+      graficoValor = double.parse(progressgoal.toStringAsFixed(1));
+    }
+  }
+
+  Text _viewNextHour() {
+    double metaDouble = _parseDouble(_goal?.metaL);
+    if (nextHour != null) {
+      return Text(
+        "Próximo horário: ${format.format(nextHour!)}",
+        style: AppTextStyles.smallText,
+      );
+    } else {
+      if (((progressgoal * 100) / metaDouble) == 100) {
+        return Text("Meta concluida");
+      } else {
+        return Text("Todos os periodos de agua passaram");
+      }
     }
   }
 }

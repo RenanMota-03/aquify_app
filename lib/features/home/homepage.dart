@@ -15,16 +15,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<String> listQuantidade = [
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+  ];
   int pageAtual = 0;
   final _controllerNewGoal = locator.get<NewGoalsController>();
   late PageController pageController;
+
   @override
   void initState() {
     super.initState();
     pageController = PageController(initialPage: pageAtual);
-    if (_controllerNewGoal is NewGoalsStateSuccess) {
-      setPageAtual(pageAtual - 1);
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_controllerNewGoal.state is NewGoalsStateSuccess) {
+        setPageAtual(pageAtual - 1);
+      }
+    });
   }
 
   setPageAtual(page) {
@@ -57,7 +71,7 @@ class _HomePageState extends State<HomePage> {
       body: PageView(
         controller: pageController,
         onPageChanged: setPageAtual,
-        children: [GoalsPage(), NewGoalsPage()],
+        children: [GoalsPage(), NewGoalsPage(listQuantidade: listQuantidade)],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: pageAtual,
@@ -82,11 +96,14 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         onTap: (page) {
-          pageController.animateToPage(
-            page,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.ease,
-          );
+          if (page != pageAtual) {
+            setPageAtual(page);
+            pageController.animateToPage(
+              page,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.ease,
+            );
+          }
         },
       ),
     );

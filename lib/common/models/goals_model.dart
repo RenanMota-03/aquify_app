@@ -6,6 +6,7 @@ class GoalsModel {
   final String? dateBegin;
   final String? dateEnd;
   final String? quantidadeMl;
+  final List<DateTime>? listHour;
 
   GoalsModel({
     this.id,
@@ -13,6 +14,7 @@ class GoalsModel {
     this.dateBegin,
     this.dateEnd,
     this.quantidadeMl,
+    this.listHour,
   });
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -21,6 +23,7 @@ class GoalsModel {
       'dateBegin': dateBegin,
       'dateEnd': dateEnd,
       'quantidadeMl': quantidadeMl,
+      'listHour': listHour,
     };
   }
 
@@ -32,6 +35,8 @@ class GoalsModel {
       dateEnd: map['dateEnd'] != null ? map['dateEnd'] as String : null,
       quantidadeMl:
           map['quantidadeMl'] != null ? map['quantidadeMl'] as String : null,
+      listHour:
+          map['listHour'] != null ? map['listHour'] as List<DateTime> : null,
     );
   }
   String toJson() => json.encode(toMap());

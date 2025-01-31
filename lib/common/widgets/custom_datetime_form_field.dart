@@ -1,5 +1,6 @@
 import 'package:aquify_app/common/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../constants/app_colors.dart';
 
@@ -8,6 +9,7 @@ class CustomDatetimeFormField extends StatefulWidget {
   final String? hintText;
   final FormFieldValidator<String>? validator;
   final TextEditingController? controller;
+
   const CustomDatetimeFormField({
     super.key,
     this.labelText,
@@ -15,6 +17,7 @@ class CustomDatetimeFormField extends StatefulWidget {
     this.validator,
     this.controller,
   });
+
   @override
   State<CustomDatetimeFormField> createState() =>
       _CustomDatetimeFormFieldState();
@@ -22,8 +25,9 @@ class CustomDatetimeFormField extends StatefulWidget {
 
 class _CustomDatetimeFormFieldState extends State<CustomDatetimeFormField> {
   late TextEditingController _internalController;
-  TimeOfDay selectedTime = TimeOfDay(hour: 14, minute: 30);
-  bool _initialized = false;
+  DateTime? selectedDateTime;
+  final DateFormat timeFormat = DateFormat("HH:mm");
+
   @override
   void dispose() {
     if (widget.controller == null) {
@@ -36,28 +40,30 @@ class _CustomDatetimeFormFieldState extends State<CustomDatetimeFormField> {
   void initState() {
     super.initState();
     _internalController = widget.controller ?? TextEditingController();
+    selectedDateTime = DateTime.now();
+    _updateTextField();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _internalController.text = selectedTime.format(
-        context,
-      ); // Agora é seguro acessar o contexto
-      _initialized = true;
-    }
+  void _updateTextField() {
+    _internalController.text = timeFormat.format(selectedDateTime!);
   }
 
   Future<void> _pickTime() async {
     TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: selectedTime,
+      initialTime: TimeOfDay.fromDateTime(selectedDateTime!),
     );
-    if (pickedTime != null && pickedTime != selectedTime) {
+
+    if (pickedTime != null) {
       setState(() {
-        selectedTime = pickedTime;
-        _internalController.text = selectedTime.format(context);
+        selectedDateTime = DateTime(
+          selectedDateTime!.year,
+          selectedDateTime!.month,
+          selectedDateTime!.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        _updateTextField();
       });
     }
   }
