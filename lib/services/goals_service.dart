@@ -7,5 +7,6 @@ abstract class GoalsService {
     required String? dateBegin,
     required String? dateEnd,
     required String? quantidadeMl,
+    List<String>? listHour,
   });
 }

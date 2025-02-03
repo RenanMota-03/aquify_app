@@ -6,7 +6,7 @@ class GoalsModel {
   final String? dateBegin;
   final String? dateEnd;
   final String? quantidadeMl;
-  final List<DateTime>? listHour;
+  final List<String>? listHour;
 
   GoalsModel({
     this.id,
@@ -29,14 +29,15 @@ class GoalsModel {
 
   factory GoalsModel.fromMap(Map<String, dynamic> map) {
     return GoalsModel(
-      id: map['id'] != null ? map['id'] as String : null,
-      metaL: map['metaL'] != null ? map['metaL'] as String : null,
-      dateBegin: map['dateBegin'] != null ? map['dateBegin'] as String : null,
-      dateEnd: map['dateEnd'] != null ? map['dateEnd'] as String : null,
-      quantidadeMl:
-          map['quantidadeMl'] != null ? map['quantidadeMl'] as String : null,
+      id: map['id'] as String?,
+      metaL: map['metaL'] as String?,
+      dateBegin: map['dateBegin'] as String?,
+      dateEnd: map['dateEnd'] as String?,
+      quantidadeMl: map['quantidadeMl'] as String?,
       listHour:
-          map['listHour'] != null ? map['listHour'] as List<DateTime> : null,
+          map['listHour'] != null
+              ? List<String>.from(map['listHour'] as List)
+              : null,
     );
   }
   String toJson() => json.encode(toMap());

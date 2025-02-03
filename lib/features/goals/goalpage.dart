@@ -1,17 +1,18 @@
 import 'dart:developer';
-
-import 'package:aquify_app/common/constants/app_text_styles.dart';
-import 'package:aquify_app/common/widgets/grafic_circular/grafic_circular_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:aquify_app/common/constants/app_colors.dart';
+import 'package:aquify_app/common/constants/app_text_styles.dart';
 import '../../common/models/goals_model.dart';
 import '../../common/widgets/custom_background_container.dart';
+import '../../common/widgets/custom_dropdown_sheet.dart';
 import '../../common/widgets/grafic_circular.dart';
 import '../../common/widgets/primary_button.dart';
 import '../../locator.dart';
 import 'goal_controller.dart';
 
 class GoalsPage extends StatefulWidget {
-  const GoalsPage({super.key});
+  final List<String> listQtd;
+  const GoalsPage({super.key, required this.listQtd});
 
   @override
   State<GoalsPage> createState() => _GoalspageState();
@@ -21,45 +22,76 @@ class _GoalspageState extends State<GoalsPage> {
   double qtdbebida = 0.0;
   double progress = 0;
   final _goalController = locator.get<GoalController>();
-  final _gcController = locator.get<GraficCircularController>();
-  late List<DateTime> listHorario;
-  DateTime? nowGoal;
+  final TextEditingController _modalDropController = TextEditingController();
+
   GoalsModel? _goal;
+  Set<String> consumedTimes = {};
+  String? delayedConsumedTime;
   void _loadGoalData() async {
     GoalsModel? goal = await _goalController.getGoal();
     setState(() {
       _goal = goal;
+      log("Teste lista:${_goal?.listHour.toString()}");
     });
   }
 
   @override
   void initState() {
-    listHorario = _gcController.horario;
-    nowGoal = _gcController.now;
-    log(listHorario.toString());
     _loadGoalData();
-    _verifyRemocao();
     super.initState();
   }
 
-  void _verifyRemocao() {
-    listHorario = _gcController.horarios;
-    nowGoal = _gcController.now;
-    if (listHorario.isNotEmpty && listHorario.first == nowGoal) {
-      setState(() {
-        listHorario.removeAt(0);
-      });
-      log(listHorario.toString());
+  @override
+  void dispose() {
+    super.dispose();
+    _goalController.dispose();
+    _modalDropController.dispose();
+  }
+
+  DateTime _parseNextHour(String nextHour) {
+    final now = DateTime.now();
+    final parts = nextHour.split(":");
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    return DateTime(now.year, now.month, now.day, hour, minute);
+  }
+
+  bool withinMarginDelay(String nextHour) {
+    final nextHourDateTime = _parseNextHour(nextHour);
+    final now = DateTime.now();
+    return now.isBefore(nextHourDateTime.add(const Duration(minutes: 5)));
+  }
+
+  bool timeHasPassed(String nextHour) {
+    final nextHourDateTime = _parseNextHour(nextHour);
+    return DateTime.now().isAfter(
+      nextHourDateTime.add(const Duration(minutes: 5)),
+    );
+  }
+
+  Color defineTimeColor(String nextHour) {
+    if (consumedTimes.contains(nextHour)) {
+      return Colors.green;
+    } else if (timeHasPassed(nextHour)) {
+      return AppColors.error;
     }
+    return AppColors.blueOne;
+  }
+
+  void registerConsumption() {
+    setState(() {
+      String hourAtual = "${DateTime.now().hour}:${DateTime.now().minute}";
+
+      if (withinMarginDelay(hourAtual)) {
+        consumedTimes.add(hourAtual);
+      }
+      progress += double.parse(_modalDropController.text) / 1000;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    listHorario = _gcController.horarios;
-    nowGoal = _gcController.now;
-    if (_goal?.quantidadeMl != null) {
-      qtdbebida = double.parse(_goal!.quantidadeMl!) / 1000;
-    }
     return Scaffold(
       body: Align(
         child: CustomBackgroundContainer(
@@ -77,33 +109,38 @@ class _GoalspageState extends State<GoalsPage> {
                     PrimaryButton(
                       text: "Beber",
                       onPressed: () {
-                        setState(() {
-                          progress += qtdbebida;
-                        });
+                        customDropdownBottomSheet(
+                          context,
+                          buttonText: "Beber",
+                          content: "Coloque a quantidade de água",
+                          controller: _modalDropController,
+                          hintText: "Quantidade bebida em ML",
+                          list: widget.listQtd,
+                          onPressed: registerConsumption,
+                        );
                       },
                     ),
                   ],
                 ),
               ),
-              listHorario.isEmpty
-                  ? Text("Todos os Horários passaram")
-                  : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: listHorario.length > 5 ? 5 : listHorario.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 32,
-                        ),
-                        child: Text(
-                          "Horario para tomar: ${listHorario[index]}",
-                          style: AppTextStyles.mediumText18,
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    },
-                  ),
+
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children:
+                      (_goal?.listHour ?? [])
+                          .map(
+                            (item) => Text(
+                              "Horário de Beber: $item",
+                              style: AppTextStyles.smallText.copyWith(
+                                color: defineTimeColor(item),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                ),
+              ),
             ],
           ),
         ),

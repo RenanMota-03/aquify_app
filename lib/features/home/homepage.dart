@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<String> listQuantidade = [
-    "100",
     "200",
     "300",
     "400",
@@ -32,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     pageController = PageController(initialPage: pageAtual);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,7 +71,10 @@ class _HomePageState extends State<HomePage> {
       body: PageView(
         controller: pageController,
         onPageChanged: setPageAtual,
-        children: [GoalsPage(), NewGoalsPage(listQuantidade: listQuantidade)],
+        children: [
+          GoalsPage(listQtd: listQuantidade),
+          NewGoalsPage(listQuantidade: listQuantidade),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: pageAtual,

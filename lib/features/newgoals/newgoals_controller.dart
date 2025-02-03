@@ -23,6 +23,7 @@ class NewGoalsController extends ChangeNotifier {
     required String dateEnd,
     required String meta,
     required String quantidadeMl,
+    required List<String> listHour,
   }) async {
     const secureStorage = SecureStorage();
     _changeState(NewGoalsStateLoading());
@@ -33,6 +34,7 @@ class NewGoalsController extends ChangeNotifier {
         dateEnd: dateEnd,
         meta: meta,
         quantidadeMl: quantidadeMl,
+        listHour: listHour,
       );
       if (goal.id != null) {
         await secureStorage.write(key: "Goal", value: goal.toJson());

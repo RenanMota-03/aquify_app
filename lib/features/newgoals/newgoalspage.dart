@@ -10,6 +10,7 @@ import 'package:aquify_app/features/newgoals/newgoals_controller.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/constants/routes.dart';
+import '../../common/utils/hour_intervals.dart';
 import '../../common/widgets/custom_bottom_sheet.dart';
 import '../../common/widgets/custom_circular_progress_indicator.dart';
 import '../../common/widgets/dropdown_widget.dart';
@@ -128,9 +129,18 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                               meta: _metaLController.text,
                               dateBegin: _dateBeginController.text,
                               dateEnd: _dateEndController.text,
+                              listHour: HourIntervals.instance.loadHours(
+                                dateBegin: _dateBeginController.text,
+                                dateEnd: _dateEndController.text,
+                                quantidade: _quantidadeMlController.text,
+                                metaL: _metaLController.text,
+                              ),
                             );
                             log(_dateBeginController.text);
                             log(_dateEndController.text);
+                            log(
+                              "2222 ${HourIntervals.instance.loadHours(dateBegin: _dateBeginController.text, dateEnd: _dateEndController.text, quantidade: _quantidadeMlController.text, metaL: _metaLController.text).toString()}",
+                            );
                           } else {
                             log("erro de login");
                           }

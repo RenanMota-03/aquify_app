@@ -6,7 +6,6 @@ import '../../features/goals/goal_controller.dart';
 import '../../locator.dart';
 import '../constants/app_colors.dart';
 import '../models/goals_model.dart';
-import 'package:intl/intl.dart';
 
 class GraficCircularWidget extends StatefulWidget {
   final double progress;
@@ -24,19 +23,10 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   double progressgoal = 0.0;
   double restantgoal = 0.0;
   String graficoLabel = 'Meta';
-  int intervalos = 0;
-  List<DateTime> horario = [];
-  List<DateTime> horarios = [];
-  DateTime now = DateTime.now();
-  DateTime? nextHour;
-  DateFormat format = DateFormat("HH:mm");
-
   @override
   void initState() {
     super.initState();
     _loadGoalData();
-    _loadHours();
-    _viewNextHour();
   }
 
   void _loadGoalData() async {
@@ -50,95 +40,6 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   double _parseDouble(String? value) {
     if (value == null || value.isEmpty) return 0.0;
     return double.tryParse(value) ?? 0.0;
-  }
-
-  void _loadHours() {
-    if (_goal == null) return;
-
-    String? horaInicio = _goal!.dateBegin;
-    String? horaFim = _goal!.dateEnd;
-    if (horaInicio == null || horaFim == null) return;
-
-    double quantidadeMl = _parseDouble(_goal!.quantidadeMl!) / 1000;
-    double meta = _parseDouble(_goal!.metaL);
-
-    DateTime now = DateTime.now();
-    DateTime inicio = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.parse(horaInicio.split(":")[0]),
-      int.parse(horaInicio.split(":")[1]),
-    );
-
-    DateTime fim = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      int.parse(horaFim.split(":")[0]),
-      int.parse(horaFim.split(":")[1]),
-    );
-
-    if (fim.isBefore(inicio)) {
-      fim = fim.add(const Duration(days: 1));
-    }
-
-    Duration diferenca = fim.difference(inicio);
-    int totalMinutos = diferenca.inMinutes;
-    int numIntervalos = (meta / quantidadeMl).floor();
-    int intervaloMinutos = totalMinutos ~/ numIntervalos;
-
-    horarios.clear();
-    for (int i = 0; i <= numIntervalos; i++) {
-      DateTime horarioAtual = inicio.add(
-        Duration(minutes: i * intervaloMinutos),
-      );
-      horarios.add(horarioAtual);
-    }
-    horario = horarios;
-    intervalos = numIntervalos;
-    _updateNextHour();
-  }
-
-  void _updateNextHour() {
-    now = DateTime.now();
-    nextHour = null;
-
-    for (DateTime horario in horarios) {
-      if (horario.isAfter(now)) {
-        nextHour = _roundToNextTenMinutes(horario);
-        break;
-      }
-    }
-
-    log(
-      nextHour != null
-          ? "Próximo horário arredondado: ${format.format(nextHour!)}"
-          : "Todos os intervalos já passaram.",
-    );
-  }
-
-  DateTime _roundToNextTenMinutes(DateTime dateTime) {
-    int minute = dateTime.minute;
-    int roundedMinute = ((minute ~/ 10) + 1) * 10;
-
-    if (roundedMinute == 60) {
-      return DateTime(
-        dateTime.year,
-        dateTime.month,
-        dateTime.day,
-        dateTime.hour + 1,
-        0,
-      );
-    }
-
-    return DateTime(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      roundedMinute,
-    );
   }
 
   @override
@@ -186,7 +87,6 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
               ),
             ),
             Text("${graficoValor}L", style: TextStyle(fontSize: 28)),
-            _viewNextHour(),
           ],
         ),
       ],
@@ -246,9 +146,7 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
 
   setGraficoDados(index) {
     double metaDouble = _parseDouble(_goal?.metaL);
-    if (_goal != null) {
-      _loadHours();
-    }
+    if (_goal != null) {}
     if (widget.progress != 0) {
       progressgoal = widget.progress;
     }
@@ -266,22 +164,6 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
     } else {
       graficoLabel = "Bebido";
       graficoValor = double.parse(progressgoal.toStringAsFixed(1));
-    }
-  }
-
-  Text _viewNextHour() {
-    double metaDouble = _parseDouble(_goal?.metaL);
-    if (nextHour != null) {
-      return Text(
-        "Próximo horário: ${format.format(nextHour!)}",
-        style: AppTextStyles.smallText,
-      );
-    } else {
-      if (((progressgoal * 100) / metaDouble) == 100) {
-        return Text("Meta concluida");
-      } else {
-        return Text("Todos os periodos de agua passaram");
-      }
     }
   }
 }

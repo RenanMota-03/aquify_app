@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
+import 'dropdown_widget.dart';
 import 'primary_button.dart';
 
-Future<void> customModalBottomSheet(
+Future<void> customDropdownBottomSheet(
   BuildContext context, {
   required String content,
   required String buttonText,
+  required TextEditingController controller,
+  required String hintText,
+  required List<String> list,
 
   VoidCallback? onPressed,
 }) {
@@ -37,12 +41,16 @@ Future<void> customModalBottomSheet(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               child: Text(
                 content,
-                style: AppTextStyles.mediumText20.copyWith(
+                style: AppTextStyles.smallText.copyWith(
                   color: AppColors.blueOne,
                 ),
               ),
             ),
-
+            DropdownMenuWidget(
+              list: list,
+              controller: controller,
+              hintText: hintText,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 8.0,

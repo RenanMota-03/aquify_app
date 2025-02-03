@@ -1,27 +1,27 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../constants/app_text_styles.dart';
 
 class HourIntervals {
   HourIntervals._();
+  static final HourIntervals instance = HourIntervals._();
   int intervalos = 0;
-  List<DateTime> horario = [];
   List<DateTime> horarios = [];
   DateTime now = DateTime.now();
-  DateTime? nextHour;
   DateFormat format = DateFormat("HH:mm");
   double _parseDouble(String? value) {
     if (value == null || value.isEmpty) return 0.0;
     return double.tryParse(value) ?? 0.0;
   }
 
-  void loadHours({
-    required dateBegin,
-    required dateEnd,
-    required quantidade,
-    required metaL,
+  List<String> loadHours({
+    required String dateBegin,
+    required String dateEnd,
+    required String quantidade,
+    required String metaL,
   }) {
-    String? horaInicio = dateBegin;
-    String? horaFim = dateEnd;
-    if (horaInicio == null || horaFim == null) return;
+    String horaInicio = dateBegin;
+    String horaFim = dateEnd;
 
     double quantidadeMl = _parseDouble(quantidade) / 1000;
     double meta = _parseDouble(metaL);
@@ -52,50 +52,87 @@ class HourIntervals {
     int numIntervalos = (meta / quantidadeMl).floor();
     int intervaloMinutos = totalMinutos ~/ numIntervalos;
 
-    horarios.clear();
+    List<DateTime> horarios = [];
+
     for (int i = 0; i <= numIntervalos; i++) {
       DateTime horarioAtual = inicio.add(
         Duration(minutes: i * intervaloMinutos),
       );
       horarios.add(horarioAtual);
     }
-    horario = horarios;
-    intervalos = numIntervalos;
-    _updateNextHour();
+
+    List<DateTime> horariosArredondados = _roundToBeforeTenMinutes(
+      horarios,
+      dateEnd,
+    );
+
+    return horariosArredondados.map((horario) {
+      return "${horario.hour.toString().padLeft(2, '0')}:${horario.minute.toString().padLeft(2, '0')}";
+    }).toList();
   }
 
-  void _updateNextHour() {
-    now = DateTime.now();
-    nextHour = null;
+  List<DateTime> _roundToBeforeTenMinutes(
+    List<DateTime> dateTimes,
+    String dateEnd,
+  ) {
+    if (dateTimes.isEmpty) return [];
+    if (dateTimes.length == 1) return dateTimes;
 
-    for (DateTime horario in horarios) {
-      if (horario.isAfter(now)) {
-        nextHour = _roundToNextTenMinutes(horario);
-        break;
+    DateTime now = DateTime.now();
+    List<String> endParts = dateEnd.split(":");
+    DateTime dateEndTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(endParts[0]),
+      int.parse(endParts[1]),
+    );
+
+    List<DateTime> result = [
+      dateTimes.first,
+      ...dateTimes.skip(1).take(dateTimes.length - 2).map((dateTime) {
+        return _roundToNearestThirtyMinutes(dateTime);
+      }),
+    ];
+
+    DateTime lastRounded = _roundToNearestThirtyMinutes(dateTimes.last);
+
+    if (lastRounded.isAfter(dateEndTime)) {
+      result.add(dateEndTime);
+    } else {
+      result.add(lastRounded);
+    }
+
+    return result;
+  }
+
+  DateTime _roundToNearestThirtyMinutes(DateTime dateTime) {
+    int deltaMinute;
+
+    if (dateTime.minute < 15) {
+      deltaMinute = -dateTime.minute;
+    } else if (dateTime.minute < 45) {
+      deltaMinute = 30 - dateTime.minute;
+    } else {
+      deltaMinute = 60 - dateTime.minute;
+    }
+
+    return dateTime.add(Duration(minutes: deltaMinute));
+  }
+
+  Text viewNextHour({required meta, required progress, nextHour}) {
+    double metaDouble = _parseDouble(meta);
+    if (nextHour != null) {
+      return Text(
+        "Próximo horário: ${format.format(nextHour!)}",
+        style: AppTextStyles.smallText,
+      );
+    } else {
+      if (((progress * 100) / metaDouble) == 100) {
+        return Text("Meta concluida");
+      } else {
+        return Text("Todos os periodos de agua passaram");
       }
     }
-  }
-
-  DateTime _roundToNextTenMinutes(DateTime dateTime) {
-    int minute = dateTime.minute;
-    int roundedMinute = ((minute ~/ 10) + 1) * 10;
-
-    if (roundedMinute == 60) {
-      return DateTime(
-        dateTime.year,
-        dateTime.month,
-        dateTime.day,
-        dateTime.hour + 1,
-        0,
-      );
-    }
-
-    return DateTime(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      roundedMinute,
-    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import '../../common/models/goals_model.dart';
 import '../../services/secure_storage.dart';
@@ -25,6 +27,7 @@ class GoalController extends ChangeNotifier {
   Future<GoalsModel?> getGoal() async {
     final result = await _service.readOne(key: "Goal");
     if (result != null) {
+      log(result);
       return GoalsModel.fromJson(result);
     }
     return null;

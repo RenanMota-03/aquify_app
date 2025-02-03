@@ -9,6 +9,7 @@ class NewGoalsServiceImpl implements GoalsService {
     required String? dateBegin,
     required String? dateEnd,
     required String? quantidadeMl,
+    List<String>? listHour,
   }) async {
     return GoalsModel(
       id: id,
@@ -16,6 +17,7 @@ class NewGoalsServiceImpl implements GoalsService {
       dateEnd: dateEnd,
       metaL: meta,
       quantidadeMl: quantidadeMl,
+      listHour: listHour,
     );
   }
 }
