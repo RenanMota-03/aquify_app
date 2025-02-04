@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../constants/app_text_styles.dart';
+import 'parse_double_utils.dart';
 
 class HourIntervals {
   HourIntervals._();
@@ -9,10 +8,6 @@ class HourIntervals {
   List<DateTime> horarios = [];
   DateTime now = DateTime.now();
   DateFormat format = DateFormat("HH:mm");
-  double _parseDouble(String? value) {
-    if (value == null || value.isEmpty) return 0.0;
-    return double.tryParse(value) ?? 0.0;
-  }
 
   List<String> loadHours({
     required String dateBegin,
@@ -23,8 +18,8 @@ class HourIntervals {
     String horaInicio = dateBegin;
     String horaFim = dateEnd;
 
-    double quantidadeMl = _parseDouble(quantidade) / 1000;
-    double meta = _parseDouble(metaL);
+    double quantidadeMl = parseDouble(quantidade) / 1000;
+    double meta = parseDouble(metaL);
 
     DateTime now = DateTime.now();
     DateTime inicio = DateTime(
@@ -118,21 +113,5 @@ class HourIntervals {
     }
 
     return dateTime.add(Duration(minutes: deltaMinute));
-  }
-
-  Text viewNextHour({required meta, required progress, nextHour}) {
-    double metaDouble = _parseDouble(meta);
-    if (nextHour != null) {
-      return Text(
-        "Próximo horário: ${format.format(nextHour!)}",
-        style: AppTextStyles.smallText,
-      );
-    } else {
-      if (((progress * 100) / metaDouble) == 100) {
-        return Text("Meta concluida");
-      } else {
-        return Text("Todos os periodos de agua passaram");
-      }
-    }
   }
 }

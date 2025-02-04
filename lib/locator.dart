@@ -9,7 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'features/sign_in/sign_in_controller.dart';
 import 'features/sign_up/sign_up_controller.dart';
 import 'services/auth_service.dart';
-import 'services/newgoal_service_impl.dart';
+import 'services/goal_service_impl.dart';
 
 final locator = GetIt.instance;
 void setupDependencies() {
@@ -25,7 +25,7 @@ void setupDependencies() {
     () => SplashController(const SecureStorage()),
   );
   locator.registerFactory<GoalController>(
-    () => GoalController(const SecureStorage()),
+    () => GoalController(const SecureStorage(), locator.get<GoalsService>()),
   );
   locator.registerFactory<NewGoalsController>(
     () => NewGoalsController(locator.get<GoalsService>()),

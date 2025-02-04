@@ -1,8 +1,9 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import '../../common/models/goals_model.dart';
+import '../../common/utils/goal_utils.dart';
 import '../../common/widgets/custom_background_container.dart';
 import '../../common/widgets/custom_dropdown_sheet.dart';
 import '../../common/widgets/grafic_circular.dart';
@@ -19,6 +20,7 @@ class GoalsPage extends StatefulWidget {
 }
 
 class _GoalspageState extends State<GoalsPage> {
+  DateTime now = DateTime.now();
   double qtdbebida = 0.0;
   double progress = 0;
   final _goalController = locator.get<GoalController>();
@@ -31,14 +33,13 @@ class _GoalspageState extends State<GoalsPage> {
     GoalsModel? goal = await _goalController.getGoal();
     setState(() {
       _goal = goal;
-      log("Teste lista:${_goal?.listHour.toString()}");
     });
   }
 
   @override
   void initState() {
-    _loadGoalData();
     super.initState();
+    _loadGoalData();
   }
 
   @override
@@ -46,37 +47,6 @@ class _GoalspageState extends State<GoalsPage> {
     super.dispose();
     _goalController.dispose();
     _modalDropController.dispose();
-  }
-
-  DateTime _parseNextHour(String nextHour) {
-    final now = DateTime.now();
-    final parts = nextHour.split(":");
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-
-    return DateTime(now.year, now.month, now.day, hour, minute);
-  }
-
-  bool withinMarginDelay(String nextHour) {
-    final nextHourDateTime = _parseNextHour(nextHour);
-    final now = DateTime.now();
-    return now.isBefore(nextHourDateTime.add(const Duration(minutes: 5)));
-  }
-
-  bool timeHasPassed(String nextHour) {
-    final nextHourDateTime = _parseNextHour(nextHour);
-    return DateTime.now().isAfter(
-      nextHourDateTime.add(const Duration(minutes: 5)),
-    );
-  }
-
-  Color defineTimeColor(String nextHour) {
-    if (consumedTimes.contains(nextHour)) {
-      return Colors.green;
-    } else if (timeHasPassed(nextHour)) {
-      return AppColors.error;
-    }
-    return AppColors.blueOne;
   }
 
   void registerConsumption() {
@@ -87,6 +57,12 @@ class _GoalspageState extends State<GoalsPage> {
         consumedTimes.add(hourAtual);
       }
       progress += double.parse(_modalDropController.text) / 1000;
+
+      setState(() {
+        _goalController.isDay(progressgoal: progress);
+      });
+
+      log(progress.toString());
     });
   }
 
@@ -95,7 +71,7 @@ class _GoalspageState extends State<GoalsPage> {
     return Scaffold(
       body: Align(
         child: CustomBackgroundContainer(
-          child: Column(
+          child: ListView(
             children: [
               AspectRatio(
                 aspectRatio: 1,
@@ -127,14 +103,17 @@ class _GoalspageState extends State<GoalsPage> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children:
                       (_goal?.listHour ?? [])
                           .map(
                             (item) => Text(
                               "Horário de Beber: $item",
                               style: AppTextStyles.smallText.copyWith(
-                                color: defineTimeColor(item),
+                                color: defineTimeColor(
+                                  nextHour: item,
+                                  consumedTimes: consumedTimes,
+                                ),
                               ),
                             ),
                           )

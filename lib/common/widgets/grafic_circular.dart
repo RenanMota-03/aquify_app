@@ -1,11 +1,13 @@
-import 'dart:developer';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
+import 'package:aquify_app/common/models/updategoal_model.dart';
+import 'package:aquify_app/common/utils/grafic_circular_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../features/goals/goal_controller.dart';
 import '../../locator.dart';
 import '../constants/app_colors.dart';
 import '../models/goals_model.dart';
+import '../utils/parse_double_utils.dart';
 
 class GraficCircularWidget extends StatefulWidget {
   final double progress;
@@ -20,26 +22,41 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
   GoalsModel? _goal;
   int touchedIndex = -1;
   double graficoValor = 0.0;
+  double? progressSave;
   double progressgoal = 0.0;
   double restantgoal = 0.0;
   String graficoLabel = 'Meta';
+  DateTime now = DateTime.now();
   @override
   void initState() {
     super.initState();
     _loadGoalData();
+    resetGoal();
   }
 
   void _loadGoalData() async {
     GoalsModel? goal = await _goalController.getGoal();
     setState(() {
       _goal = goal;
-      graficoValor = _parseDouble(goal?.metaL);
+      graficoValor = parseDouble(goal?.metaL);
+      progressgoal = progressSave ?? 0.0;
     });
   }
 
-  double _parseDouble(String? value) {
-    if (value == null || value.isEmpty) return 0.0;
-    return double.tryParse(value) ?? 0.0;
+  void resetGoal() async {
+    UpdateGoalModel? day = await _goalController.getDay();
+    DateTime date = DateTime.parse(day!.now!);
+    setState(() {
+      if (date.day < now.day && date.month == now.month) {
+        _goalController.isDay(now: now.toString(), progressgoal: 0.0);
+        progressgoal = 0.0;
+      } else if (date.month != now.month) {
+        _goalController.isDay(now: now.toString(), progressgoal: 0.0);
+        progressgoal = 0.0;
+      } else {
+        progressgoal = day.progressgoal;
+      }
+    });
   }
 
   @override
@@ -50,6 +67,13 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final graficoDados = setGraficoDados(
+      touchedIndex: touchedIndex,
+      meta: _goal?.metaL,
+      progress: widget.progress,
+      progressgoal: progressgoal,
+      restantgoal: restantgoal,
+    );
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -57,7 +81,13 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
           PieChartData(
             sectionsSpace: 0,
             centerSpaceRadius: 120,
-            sections: showingSections(),
+            sections: showingSections(
+              meta: _goal?.metaL,
+              progress: widget.progress,
+              progressgoal: progressgoal,
+              restantgoal: restantgoal,
+              touchedIndex: touchedIndex,
+            ),
             pieTouchData: PieTouchData(
               touchCallback: (FlTouchEvent event, pieTouchResponse) {
                 setState(() {
@@ -66,12 +96,16 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
                       pieTouchResponse == null ||
                       pieTouchResponse.touchedSection == null) {
                     touchedIndex = -1;
-                    setGraficoDados(touchedIndex);
+                    graficoDados;
+                    graficoLabel = graficoDados["graficoLabel"];
+                    graficoValor = graficoDados["graficoValor"];
                     return;
                   }
                   touchedIndex =
                       pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  setGraficoDados(touchedIndex);
+                  graficoDados;
+                  graficoLabel = graficoDados["graficoLabel"];
+                  graficoValor = graficoDados["graficoValor"];
                 });
               },
             ),
@@ -91,79 +125,5 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         ),
       ],
     );
-  }
-
-  List<PieChartSectionData> showingSections() {
-    double metaDouble = _parseDouble(_goal?.metaL);
-    if (widget.progress != 0) {
-      progressgoal = widget.progress;
-    }
-    if (progressgoal == 0.0) {
-      restantgoal = metaDouble;
-    } else {
-      restantgoal = metaDouble - progressgoal;
-    }
-    return List.generate(2, (i) {
-      final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: AppColors.blueOne,
-            value: progressgoal >= metaDouble ? metaDouble : progressgoal,
-            title:
-                '${progressgoal >= metaDouble ? 100 : ((progressgoal * 100) / metaDouble).toStringAsFixed(1)}%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: AppColors.iceWhite,
-              shadows: shadows,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: AppColors.darkGrey,
-            value: progressgoal >= metaDouble ? 0.0 : restantgoal,
-            title:
-                '${progressgoal >= metaDouble ? 0 : ((restantgoal * 100) / metaDouble).toStringAsFixed(1)}%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: AppColors.iceWhite,
-              shadows: shadows,
-            ),
-          );
-        default:
-          log("message");
-          throw Error();
-      }
-    });
-  }
-
-  setGraficoDados(index) {
-    double metaDouble = _parseDouble(_goal?.metaL);
-    if (_goal != null) {}
-    if (widget.progress != 0) {
-      progressgoal = widget.progress;
-    }
-    if (progressgoal == 0) {
-      restantgoal = metaDouble;
-    } else {
-      restantgoal = metaDouble - progressgoal;
-    }
-    if (index < 0) {
-      graficoLabel = 'Meta';
-      graficoValor = metaDouble;
-    } else if (index == 1) {
-      graficoLabel = 'Restante';
-      graficoValor = double.parse(restantgoal.toStringAsFixed(1));
-    } else {
-      graficoLabel = "Bebido";
-      graficoValor = double.parse(progressgoal.toStringAsFixed(1));
-    }
   }
 }

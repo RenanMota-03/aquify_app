@@ -41,6 +41,7 @@ class GoalsModel {
     );
   }
   String toJson() => json.encode(toMap());
+
   factory GoalsModel.fromJson(String source) =>
       GoalsModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }

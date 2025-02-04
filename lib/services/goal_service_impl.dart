@@ -1,4 +1,5 @@
 import 'package:aquify_app/common/models/goals_model.dart';
+import 'package:aquify_app/common/models/updategoal_model.dart';
 import 'package:aquify_app/services/goals_service.dart';
 
 class NewGoalsServiceImpl implements GoalsService {
@@ -19,5 +20,10 @@ class NewGoalsServiceImpl implements GoalsService {
       quantidadeMl: quantidadeMl,
       listHour: listHour,
     );
+  }
+
+  @override
+  Future<UpdateGoalModel> isDayUpdate(String? now, double progressgoal) async {
+    return UpdateGoalModel(now: now, progressgoal: progressgoal);
   }
 }

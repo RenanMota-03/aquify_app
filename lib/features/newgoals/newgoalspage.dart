@@ -6,11 +6,12 @@ import 'package:aquify_app/common/utils/validator.dart';
 import 'package:aquify_app/common/widgets/custom_background_container.dart';
 import 'package:aquify_app/common/widgets/custom_datetime_form_field.dart';
 import 'package:aquify_app/common/widgets/primary_button.dart';
+import 'package:aquify_app/features/goals/goal_controller.dart';
 import 'package:aquify_app/features/newgoals/newgoals_controller.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/constants/routes.dart';
-import '../../common/utils/hour_intervals.dart';
+import '../../common/utils/hour_utils.dart';
 import '../../common/widgets/custom_bottom_sheet.dart';
 import '../../common/widgets/custom_circular_progress_indicator.dart';
 import '../../common/widgets/dropdown_widget.dart';
@@ -32,6 +33,8 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
   final TextEditingController _dateEndController = TextEditingController();
   final TextEditingController _quantidadeMlController = TextEditingController();
   final _controller = locator.get<NewGoalsController>();
+  final _controllerGoal = locator.get<GoalController>();
+  DateTime now = DateTime.now();
   List<String> listMeta = ["1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
   @override
   void dispose() {
@@ -39,6 +42,7 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
     _controller.dispose();
     _dateBeginController.dispose();
     _dateEndController.dispose();
+    _controllerGoal.dispose();
   }
 
   @override
@@ -136,10 +140,9 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                                 metaL: _metaLController.text,
                               ),
                             );
-                            log(_dateBeginController.text);
-                            log(_dateEndController.text);
-                            log(
-                              "2222 ${HourIntervals.instance.loadHours(dateBegin: _dateBeginController.text, dateEnd: _dateEndController.text, quantidade: _quantidadeMlController.text, metaL: _metaLController.text).toString()}",
+                            _controllerGoal.isDay(
+                              now: now.toString(),
+                              progressgoal: 0.0,
                             );
                           } else {
                             log("erro de login");
