@@ -143,6 +143,7 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                             _controllerGoal.isDay(
                               now: now.toString(),
                               progressgoal: 0.0,
+                              selectedTimes: {},
                             );
                           } else {
                             log("erro de login");

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:aquify_app/common/models/updategoal_model.dart';
 import 'package:aquify_app/services/goals_service.dart';
 import 'package:flutter/foundation.dart';
@@ -35,14 +33,19 @@ class GoalController extends ChangeNotifier {
     return null;
   }
 
-  void isDay({String? now, required double progressgoal}) async {
+  void isDay({
+    String? now,
+    required double progressgoal,
+    Set<String>? selectedTimes,
+  }) async {
     try {
-      final day = await _serviceGoal.isDayUpdate(now, progressgoal);
-      log(day.toJson());
-      log('as${day.progressgoal.toString()}');
+      final day = await _serviceGoal.isDayUpdate(
+        now,
+        progressgoal,
+        selectedTimes,
+      );
       _service.write(key: "Day", value: day.toJson());
     } catch (e) {
-      log(e.toString());
       throw Exception();
     }
   }

@@ -11,12 +11,6 @@ DateTime _parseNextHour(String nextHour) {
   return DateTime(now.year, now.month, now.day, hour, minute);
 }
 
-bool withinMarginDelay(String nextHour) {
-  final nextHourDateTime = _parseNextHour(nextHour);
-  final now = DateTime.now();
-  return now.isBefore(nextHourDateTime.add(const Duration(minutes: 5)));
-}
-
 bool timeHasPassed(String nextHour) {
   final nextHourDateTime = _parseNextHour(nextHour);
   return DateTime.now().isAfter(
@@ -24,11 +18,8 @@ bool timeHasPassed(String nextHour) {
   );
 }
 
-Color defineTimeColor({
-  required String nextHour,
-  required Set<String> consumedTimes,
-}) {
-  if (consumedTimes.contains(nextHour)) {
+Color defineTimeColor({required String nextHour, required bool isSelected}) {
+  if (isSelected) {
     return Colors.green;
   } else if (timeHasPassed(nextHour)) {
     return AppColors.error;

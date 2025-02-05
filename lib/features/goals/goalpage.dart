@@ -1,12 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import '../../common/models/goals_model.dart';
+import '../../common/models/updategoal_model.dart';
 import '../../common/utils/goal_utils.dart';
 import '../../common/widgets/custom_background_container.dart';
 import '../../common/widgets/custom_dropdown_sheet.dart';
 import '../../common/widgets/grafic_circular.dart';
+import '../../common/widgets/labeled_checkbox_widget.dart';
 import '../../common/widgets/primary_button.dart';
 import '../../locator.dart';
 import 'goal_controller.dart';
@@ -16,25 +16,16 @@ class GoalsPage extends StatefulWidget {
   const GoalsPage({super.key, required this.listQtd});
 
   @override
-  State<GoalsPage> createState() => _GoalspageState();
+  State<GoalsPage> createState() => _GoalsPageState();
 }
 
-class _GoalspageState extends State<GoalsPage> {
-  DateTime now = DateTime.now();
-  double qtdbebida = 0.0;
-  double progress = 0;
+class _GoalsPageState extends State<GoalsPage> {
   final _goalController = locator.get<GoalController>();
   final TextEditingController _modalDropController = TextEditingController();
 
   GoalsModel? _goal;
-  Set<String> consumedTimes = {};
-  String? delayedConsumedTime;
-  void _loadGoalData() async {
-    GoalsModel? goal = await _goalController.getGoal();
-    setState(() {
-      _goal = goal;
-    });
-  }
+  Set<String> selectedTimes = {};
+  double progress = 0.0;
 
   @override
   void initState() {
@@ -44,25 +35,45 @@ class _GoalspageState extends State<GoalsPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _goalController.dispose();
     _modalDropController.dispose();
+    super.dispose();
   }
 
-  void registerConsumption() {
+  Future<void> _loadGoalData() async {
+    GoalsModel? goal = await _goalController.getGoal();
+    UpdateGoalModel? getProgress = await _goalController.getDay();
+
     setState(() {
-      String hourAtual = "${DateTime.now().hour}:${DateTime.now().minute}";
+      _goal = goal;
+      selectedTimes = getProgress?.selectedTimes ?? {};
+      progress = getProgress?.progressgoal ?? 0.0;
+    });
+  }
 
-      if (withinMarginDelay(hourAtual)) {
-        consumedTimes.add(hourAtual);
-      }
-      progress += double.parse(_modalDropController.text) / 1000;
-
+  void _registerConsumption() {
+    if (_modalDropController.text.isNotEmpty) {
       setState(() {
-        _goalController.isDay(progressgoal: progress);
+        progress += double.parse(_modalDropController.text) / 1000;
+        _goalController.isDay(
+          progressgoal: progress,
+          selectedTimes: selectedTimes,
+        );
       });
+    }
+  }
 
-      log(progress.toString());
+  void _toggleSelectedTime(String time, bool? value) {
+    setState(() {
+      if (value == true) {
+        selectedTimes.add(time);
+      } else {
+        selectedTimes.remove(time);
+      }
+      _goalController.isDay(
+        progressgoal: progress,
+        selectedTimes: selectedTimes,
+      );
     });
   }
 
@@ -77,47 +88,47 @@ class _GoalspageState extends State<GoalsPage> {
                 aspectRatio: 1,
                 child: GraficCircularWidget(progress: progress),
               ),
-
               Padding(
-                padding: const EdgeInsets.only(left: 40, right: 40),
-                child: Column(
-                  children: [
-                    PrimaryButton(
-                      text: "Beber",
-                      onPressed: () {
-                        customDropdownBottomSheet(
-                          context,
-                          buttonText: "Beber",
-                          content: "Coloque a quantidade de água",
-                          controller: _modalDropController,
-                          hintText: "Quantidade bebida em ML",
-                          list: widget.listQtd,
-                          onPressed: registerConsumption,
-                        );
-                      },
-                    ),
-                  ],
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: PrimaryButton(
+                  text: "Beber",
+                  onPressed: () {
+                    customDropdownBottomSheet(
+                      context,
+                      buttonText: "Beber",
+                      content: "Coloque a quantidade de água",
+                      controller: _modalDropController,
+                      hintText: "Quantidade bebida em ML",
+                      list: widget.listQtd,
+                      onPressed: _registerConsumption,
+                    );
+                  },
                 ),
               ),
-
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 30,
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children:
-                      (_goal?.listHour ?? [])
-                          .map(
-                            (item) => Text(
-                              "Horário de Beber: $item",
-                              style: AppTextStyles.smallText.copyWith(
-                                color: defineTimeColor(
-                                  nextHour: item,
-                                  consumedTimes: consumedTimes,
-                                ),
+                      (_goal?.listHour ?? []).map((item) {
+                        return LabeledCheckboxWidget(
+                          label: Text(
+                            "Horário de Beber: $item",
+                            style: AppTextStyles.mediumText20.copyWith(
+                              color: defineTimeColor(
+                                isSelected: selectedTimes.contains(item),
+                                nextHour: item,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                          value: selectedTimes.contains(item),
+                          onChanged:
+                              (value) => _toggleSelectedTime(item, value),
+                        );
+                      }).toList(),
                 ),
               ),
             ],

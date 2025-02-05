@@ -23,7 +23,15 @@ class NewGoalsServiceImpl implements GoalsService {
   }
 
   @override
-  Future<UpdateGoalModel> isDayUpdate(String? now, double progressgoal) async {
-    return UpdateGoalModel(now: now, progressgoal: progressgoal);
+  Future<UpdateGoalModel> isDayUpdate(
+    String? now,
+    double progressgoal,
+    Set<String>? selectedTimes,
+  ) async {
+    return UpdateGoalModel(
+      now: now,
+      progressgoal: progressgoal,
+      selectedTimes: selectedTimes,
+    );
   }
 }

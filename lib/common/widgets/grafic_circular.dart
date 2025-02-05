@@ -45,7 +45,7 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
 
   void resetGoal() async {
     UpdateGoalModel? day = await _goalController.getDay();
-    DateTime date = DateTime.parse(day!.now!);
+    DateTime date = DateTime.parse(day?.now ?? DateTime.now().toString());
     setState(() {
       if (date.day < now.day && date.month == now.month) {
         _goalController.isDay(now: now.toString(), progressgoal: 0.0);
@@ -54,7 +54,7 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
         _goalController.isDay(now: now.toString(), progressgoal: 0.0);
         progressgoal = 0.0;
       } else {
-        progressgoal = day.progressgoal;
+        progressgoal = day!.progressgoal;
       }
     });
   }
@@ -67,13 +67,6 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final graficoDados = setGraficoDados(
-      touchedIndex: touchedIndex,
-      meta: _goal?.metaL,
-      progress: widget.progress,
-      progressgoal: progressgoal,
-      restantgoal: restantgoal,
-    );
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -96,16 +89,21 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
                       pieTouchResponse == null ||
                       pieTouchResponse.touchedSection == null) {
                     touchedIndex = -1;
-                    graficoDados;
-                    graficoLabel = graficoDados["graficoLabel"];
-                    graficoValor = graficoDados["graficoValor"];
-                    return;
+                  } else {
+                    touchedIndex =
+                        pieTouchResponse.touchedSection!.touchedSectionIndex;
                   }
-                  touchedIndex =
-                      pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  graficoDados;
-                  graficoLabel = graficoDados["graficoLabel"];
-                  graficoValor = graficoDados["graficoValor"];
+
+                  final dadosAtualizados = setGraficoDados(
+                    touchedIndex: touchedIndex,
+                    meta: _goal?.metaL,
+                    progress: widget.progress,
+                    progressgoal: progressgoal,
+                    restantgoal: restantgoal,
+                  );
+
+                  graficoLabel = dadosAtualizados["graficoLabel"];
+                  graficoValor = dadosAtualizados["graficoValor"];
                 });
               },
             ),
