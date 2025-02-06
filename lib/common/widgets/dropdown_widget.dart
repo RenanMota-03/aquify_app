@@ -4,11 +4,15 @@ class DropdownMenuWidget extends StatefulWidget {
   final List<String> list;
   final TextEditingController? controller;
   final String? hintText;
+  final Widget? label;
+  final EdgeInsetsGeometry? padding;
   const DropdownMenuWidget({
     super.key,
     required this.list,
     this.controller,
     this.hintText,
+    this.label,
+    this.padding,
   });
 
   @override
@@ -26,19 +30,26 @@ class _DropdownMenuWidgetState extends State<DropdownMenuWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownMenu<String>(
-      controller: widget.controller,
-      hintText: widget.hintText,
-      initialSelection: dropdownValue,
-      onSelected: (String? value) {
-        setState(() {
-          dropdownValue = value!;
-        });
-      },
-      dropdownMenuEntries:
-          widget.list.map<DropdownMenuEntry<String>>((String value) {
-            return DropdownMenuEntry<String>(value: value, label: value);
-          }).toList(),
+    return Padding(
+      padding:
+          widget.padding ??
+          const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      child: DropdownMenu<String>(
+        width: MediaQuery.of(context).size.width,
+        label: widget.label,
+        controller: widget.controller,
+        hintText: widget.hintText,
+        initialSelection: dropdownValue,
+        onSelected: (String? value) {
+          setState(() {
+            dropdownValue = value!;
+          });
+        },
+        dropdownMenuEntries:
+            widget.list.map<DropdownMenuEntry<String>>((String value) {
+              return DropdownMenuEntry<String>(value: value, label: value);
+            }).toList(),
+      ),
     );
   }
 }

@@ -48,10 +48,18 @@ class _GraficCircularWidgetState extends State<GraficCircularWidget> {
     DateTime date = DateTime.parse(day?.now ?? DateTime.now().toString());
     setState(() {
       if (date.day < now.day && date.month == now.month) {
-        _goalController.isDay(now: now.toString(), progressgoal: 0.0);
+        _goalController.isDay(
+          now: now.toString(),
+          progressgoal: 0.0,
+          selectedTimes: {},
+        );
         progressgoal = 0.0;
       } else if (date.month != now.month) {
-        _goalController.isDay(now: now.toString(), progressgoal: 0.0);
+        _goalController.isDay(
+          now: now.toString(),
+          progressgoal: 0.0,
+          selectedTimes: {},
+        );
         progressgoal = 0.0;
       } else {
         progressgoal = day!.progressgoal;

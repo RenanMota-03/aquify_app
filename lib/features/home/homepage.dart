@@ -5,6 +5,7 @@ import 'package:aquify_app/features/newgoals/newgoals_state.dart';
 import 'package:aquify_app/features/newgoals/newgoalspage.dart';
 import 'package:flutter/material.dart';
 
+import '../../common/utils/notifications_utils.dart';
 import '../../locator.dart';
 import '../newgoals/newgoals_controller.dart';
 
@@ -31,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
+    _initialize();
     pageController = PageController(initialPage: pageAtual);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -39,6 +40,10 @@ class _HomePageState extends State<HomePage> {
         setPageAtual(pageAtual - 1);
       }
     });
+  }
+
+  void _initialize() async {
+    await loadNotification();
   }
 
   setPageAtual(page) {

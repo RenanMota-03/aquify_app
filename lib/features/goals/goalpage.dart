@@ -51,19 +51,22 @@ class _GoalsPageState extends State<GoalsPage> {
     });
   }
 
-  void _registerConsumption() {
+  void _registerConsumption() async {
+    UpdateGoalModel? getProgress = await _goalController.getDay();
     if (_modalDropController.text.isNotEmpty) {
       setState(() {
         progress += double.parse(_modalDropController.text) / 1000;
         _goalController.isDay(
           progressgoal: progress,
           selectedTimes: selectedTimes,
+          now: getProgress?.now,
         );
       });
     }
   }
 
-  void _toggleSelectedTime(String time, bool? value) {
+  void _toggleSelectedTime(String time, bool? value) async {
+    UpdateGoalModel? getProgress = await _goalController.getDay();
     setState(() {
       if (value == true) {
         selectedTimes.add(time);
@@ -73,6 +76,7 @@ class _GoalsPageState extends State<GoalsPage> {
       _goalController.isDay(
         progressgoal: progress,
         selectedTimes: selectedTimes,
+        now: getProgress?.now,
       );
     });
   }

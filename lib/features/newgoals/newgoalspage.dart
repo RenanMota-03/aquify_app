@@ -100,6 +100,12 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                       controller: _metaLController,
                       list: listMeta,
                       hintText: "Selecione a sua Meta",
+                      label: Text(
+                        "Meta em Litros".toUpperCase(),
+                        style: AppTextStyles.inputLabelText.copyWith(
+                          color: AppColors.grey,
+                        ),
+                      ),
                     ),
                     CustomDatetimeFormField(
                       labelText: "Horario de Inicio",
@@ -117,6 +123,12 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                       controller: _quantidadeMlController,
                       list: widget.listQuantidade,
                       hintText: "Selecione o tamanho do seu Copo",
+                      label: Text(
+                        "Tamanho do copo em Ml".toUpperCase(),
+                        style: AppTextStyles.inputLabelText.copyWith(
+                          color: AppColors.grey,
+                        ),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(32.0),

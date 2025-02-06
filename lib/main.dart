@@ -11,7 +11,8 @@ import 'locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService().initNotification();
+  final notificationService = NotificationService();
+  await notificationService.initNotification();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
