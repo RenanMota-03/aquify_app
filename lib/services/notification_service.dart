@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'dart:typed_data';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
 
+@pragma('vm:entry-point')
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -18,8 +18,6 @@ class NotificationService {
   Future<void> initNotification() async {
     if (_isInitialized) return;
     _isInitialized = true;
-
-    tz.initializeTimeZones();
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
@@ -62,27 +60,6 @@ class NotificationService {
         ?.createNotificationChannel(channel);
   }
 
-  NotificationDetails _notificationDetails() {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'daily_channel_id',
-        'Daily Notifications',
-        channelDescription: 'Daily water reminders',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(),
-    );
-  }
-
-  Future<void> showNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    await _notificationsPlugin.show(id, title, body, _notificationDetails());
-  }
-
   Future<void> scheduleDailyNotifications(List<String> horarios) async {
     await _notificationsPlugin.cancelAll();
 
@@ -92,41 +69,73 @@ class NotificationService {
     }
 
     for (int i = 0; i < horarios.length; i++) {
-      final parts = horarios[i].split(':');
-      if (parts.length != 2) continue;
+      final timeParts = horarios[i].split(':');
 
-      final int hour = int.parse(parts[0]);
-      final int minute = int.parse(parts[1]);
-
-      final now = tz.TZDateTime.now(tz.local);
-      var scheduledTime = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
-      );
-
-      if (scheduledTime.isBefore(now)) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
+      if (timeParts.length != 2) {
+        log("Formato inválido para horário: ${horarios[i]}");
+        continue;
       }
 
-      await _notificationsPlugin.zonedSchedule(
-        i,
-        'Hora de beber água',
-        'Beba um copo de água para se manter hidratado!',
-        scheduledTime,
-        _notificationDetails(),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
+      try {
+        final int hour = int.parse(timeParts[0]);
+        final int minute = int.parse(timeParts[1]);
 
-      log(
-        "Notificação agendada para: ${scheduledTime.hour}:${scheduledTime.minute}",
-      );
+        final now = DateTime.now();
+        var scheduledTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          hour,
+          minute,
+        );
+
+        if (scheduledTime.isBefore(now)) {
+          scheduledTime = scheduledTime.add(const Duration(days: 1));
+        }
+
+        final int alarmId = i + 1;
+
+        await AndroidAlarmManager.oneShotAt(
+          scheduledTime,
+          alarmId,
+          triggerNotification,
+          exact: true,
+          wakeup: true,
+          rescheduleOnReboot: true,
+        );
+
+        log(
+          "✅ Notificação agendada para: ${scheduledTime.hour}:${scheduledTime.minute}",
+        );
+      } catch (e) {
+        log("Erro ao processar horário: ${horarios[i]} -> $e");
+      }
     }
+  }
+
+  @pragma('vm:entry-point')
+  static void triggerNotification() async {
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'notificacao_channel',
+          'Hora de beber água 💧',
+          channelDescription: 'Beba um copo de água para se manter hidratado!',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Hora de beber água 💧',
+      'Beba um copo de água para se manter hidratado!',
+      notificationDetails,
+    );
   }
 }

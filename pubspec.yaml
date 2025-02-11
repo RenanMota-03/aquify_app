@@ -44,7 +44,12 @@ dependencies:
   intl: ^0.20.2
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
-
+  firebase_messaging: ^15.2.2
+  android_alarm_manager_plus:
+    git:
+      url: https://github.com/fluttercommunity/plus_plugins
+      path: packages/android_alarm_manager_plus
+  cloud_firestore: ^5.6.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
