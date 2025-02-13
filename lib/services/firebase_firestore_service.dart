@@ -1,59 +1,69 @@
-import 'dart:developer';
-
-import 'package:aquify_app/common/models/analytics_model.dart';
 import 'package:aquify_app/services/progress_day_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../common/models/analytics_model.dart';
 
 class FirebaseFirestoreService implements ProgressDayService {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Obtém o UID do usuário autenticado
-  String? getCurrentUserId() {
-    return auth.currentUser?.uid;
-  }
-
-  /// Salva um registro no Firestore atrelado ao usuário
+  /// Salva os dados de progresso do usuário no Firestore
   @override
-  Future<void> saveProgressDay(AnalyticsModel analytics) async {
-    final String? uid = getCurrentUserId();
-    if (uid == null) {
-      log('Erro: Usuário não autenticado.');
-      return;
-    }
-
+  Future<void> saveProgress({
+    required String day,
+    required String meta,
+    required double progress,
+  }) async {
     try {
-      await db
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("Usuário não autenticado.");
+      }
+
+      final docRef = _db
           .collection('users')
-          .doc(uid)
-          .collection('progressDay')
-          .doc(analytics.day) // Cada documento é um dia único
-          .set(analytics.toMap(), SetOptions(merge: true));
+          .doc(user.uid)
+          .collection('progress')
+          .doc(day);
+
+      await docRef.set({
+        'meta': meta,
+        'day': day,
+        'progress': progress,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
-      log('Erro ao salvar progresso do dia: $e');
+      throw Exception("Erro ao salvar progresso: ${e.toString()}");
     }
   }
 
-  /// Busca todos os registros do usuário autenticado para exibição no gráfico
+  /// Busca os dados de progresso do usuário autenticado
   @override
   Future<List<AnalyticsModel>> getAllProgressDays() async {
-    final String? uid = getCurrentUserId();
-    if (uid == null) {
-      log('Erro: Usuário não autenticado.');
-      return [];
-    }
-
     try {
-      final querySnapshot =
-          await db.collection('users').doc(uid).collection('progressDay').get();
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("Usuário não autenticado.");
+      }
 
-      return querySnapshot.docs
-          .map((doc) => AnalyticsModel.fromMap(doc.data()))
-          .toList();
+      final querySnapshot =
+          await _db
+              .collection('users')
+              .doc(user.uid)
+              .collection('progress')
+              .orderBy('timestamp', descending: true)
+              .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return AnalyticsModel(
+          meta: data['meta'],
+          day: data['day'],
+          progress: data['progress'],
+        );
+      }).toList();
     } catch (e) {
-      log('Erro ao buscar progresso dos dias: $e');
-      return [];
+      throw Exception("Erro ao buscar progresso: ${e.toString()}");
     }
   }
 }

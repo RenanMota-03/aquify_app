@@ -103,10 +103,6 @@ class NotificationService {
           wakeup: true,
           rescheduleOnReboot: true,
         );
-
-        log(
-          "✅ Notificação agendada para: ${scheduledTime.hour}:${scheduledTime.minute}",
-        );
       } catch (e) {
         log("Erro ao processar horário: ${horarios[i]} -> $e");
       }

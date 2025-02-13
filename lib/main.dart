@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-
+import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 import 'locator.dart';
@@ -32,6 +32,6 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   await AndroidAlarmManager.initialize();
-
+  await initializeDateFormatting('pt_BR', null);
   runApp(ProviderScope(child: const App()));
 }

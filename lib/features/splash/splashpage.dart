@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:aquify_app/common/widgets/custom_circular_progress_indicator.dart';
@@ -27,10 +25,8 @@ class _SplashPageState extends State<SplashPage> {
     _splashController.addListener(() {
       if (_splashController.state is SplashStateSuccess) {
         Navigator.pushReplacementNamed(context, NamedRoute.home);
-        log('navegar para home');
       } else {
         Navigator.pushReplacementNamed(context, NamedRoute.initial);
-        log('navegar para onboarding');
       }
     });
   }

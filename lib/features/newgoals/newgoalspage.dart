@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:aquify_app/common/constants/app_colors.dart';
 import 'package:aquify_app/common/constants/app_text_styles.dart';
 import 'package:aquify_app/common/utils/validator.dart';
@@ -157,8 +155,6 @@ class _NewGoalsPageState extends State<NewGoalsPage> {
                               progressgoal: 0.0,
                               selectedTimes: {},
                             );
-                          } else {
-                            log("erro de login");
                           }
                         },
                       ),

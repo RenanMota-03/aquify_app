@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -57,7 +55,6 @@ List<PieChartSectionData> showingSections({
           ),
         );
       default:
-        log("message");
         throw Error();
     }
   });

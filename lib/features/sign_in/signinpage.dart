@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:aquify_app/common/utils/validator.dart';
 import 'package:aquify_app/common/widgets/custom_text_form_field.dart';
 import 'package:aquify_app/common/widgets/password_text_form_field.dart';
@@ -112,8 +110,6 @@ class _SignInPageState extends State<SignInPage> {
                       email: _emailController.text,
                       password: _passwordController.text,
                     );
-                  } else {
-                    log('Login errado');
                   }
                 },
               ),
